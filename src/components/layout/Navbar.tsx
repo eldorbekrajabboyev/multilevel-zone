@@ -18,7 +18,7 @@ const navLinks = [
   { label: 'Aloqa', href: '#contact' },
 ]
 
-export function Navbar({ theme, dark, toggleDark }: NavbarProps) {
+export function Navbar({ theme, toggleDark }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 

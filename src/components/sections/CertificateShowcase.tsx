@@ -82,7 +82,7 @@ export function CertificateShowcase() {
                     initial={isTop ? { opacity: 0, y: 40, scale: 0.95 } : false}
                     animate={{
                       opacity: isTop ? 1 : 1 - relativeIndex * 0.15,
-                      y: isTop ? 0 : relativeIndex * 12,
+                      y: isTop ? 0 : relativeIndex * 12 + offsetY,
                       x: offsetX * (1 + relativeIndex * 0.3),
                       scale: isTop ? 1 : 1 - relativeIndex * 0.03,
                       rotate: rotation * (1 + relativeIndex * 0.2),
