@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { ArrowRight, Play, BookOpen, Award, Users, Globe } from 'lucide-react'
 import { TypingEffect } from '../ui/TypingEffect'
 import { FloatingElement } from '../ui/FloatingElement'
@@ -11,14 +12,31 @@ const stats = [
   { icon: Globe, label: 'Filiallar', end: 3, suffix: '' },
 ]
 
-const floatingImages = [
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=120&h=120&fit=crop',
-  'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=80&h=80&fit=crop',
-  'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=90&h=90&fit=crop',
-]
-
 export function Hero() {
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  const rotateX = useSpring(useTransform(mouseY, [-150, 150], [8, -8]), { stiffness: 150, damping: 20 })
+  const rotateY = useSpring(useTransform(mouseX, [-150, 150], [-8, 8]), { stiffness: 150, damping: 20 })
+  const glareX = useSpring(useTransform(mouseX, [-150, 150], [0, 100]), { stiffness: 150, damping: 20 })
+  const glareY = useSpring(useTransform(mouseY, [-150, 150], [0, 100]), { stiffness: 150, damping: 20 })
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    mouseX.set(e.clientX - centerX)
+    mouseY.set(e.clientY - centerY)
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0)
+    mouseY.set(0)
+  }
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-gray-50 via-white to-white dark:from-[#0b1121] dark:via-[#0f172a] dark:to-[#0b1121]">
       <div className="absolute inset-0 overflow-hidden">
@@ -111,37 +129,61 @@ export function Hero() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.4, 0.25, 1] }}
             className="relative hidden lg:flex items-center justify-center"
           >
-            <div className="relative w-full max-w-lg aspect-square">
+            <div className="relative w-full max-w-lg">
               <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-400/10 to-accent-500/20 rounded-full blur-3xl animate-pulse-soft" />
 
-              <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl shadow-primary-500/15">
-                <img
-                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=600&fit=crop"
-                  alt="Students learning English"
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-900/30 via-transparent to-transparent" />
-              </div>
-
-              {floatingImages.map((src, i) => (
-                <FloatingElement
-                  key={i}
-                  className="absolute shadow-xl rounded-2xl overflow-hidden border-2 border-white dark:border-gray-800"
-                  delay={i * 0.5}
-                  duration={5 + i}
-                  distance={12 + i * 3}
-                >
+              <motion.div
+                ref={cardRef}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                style={{ rotateX, rotateY, transformPerspective: 800 }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                className="relative cursor-pointer"
+              >
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary-500/20 border border-white/30 dark:border-white/10">
                   <img
-                    src={src}
-                    alt=""
-                    className="w-16 h-16 sm:w-20 sm:h-20 object-cover"
-                    loading="lazy"
+                    src="/images/creater.jpg"
+                    alt="Otabek Saidakhmadovich — Founder of MultiLevel Zone"
+                    className="w-full aspect-[4/5] object-cover object-top"
+                    loading="eager"
                   />
-                </FloatingElement>
-              ))}
 
-              <FloatingElement className="absolute -top-6 -right-6" delay={0.3} distance={10}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: useTransform(
+                        [glareX, glareY],
+                        ([x, y]) => `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
+                      ),
+                    }}
+                  />
+
+                  <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/20 dark:ring-white/5" />
+
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white/90 text-[10px] sm:text-xs font-semibold mb-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-pulse" />
+                      Founder
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-black text-white leading-tight mb-1">
+                      Otabek Saidakhmadovich
+                    </h3>
+                    <p className="text-xs sm:text-sm text-white/70 font-medium">
+                      Founder of MultiLevel Zone
+                    </p>
+                    <div className="w-12 h-0.5 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full mt-3" />
+                  </div>
+                </div>
+
+                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-primary-500/20 via-transparent to-secondary-500/20 blur-xl opacity-60 -z-10" />
+
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-3/4 h-6 bg-primary-500/15 blur-2xl rounded-full" />
+              </motion.div>
+
+              <FloatingElement className="absolute -top-5 -right-5" delay={0.3} distance={10}>
                 <div className="glass brand-float-glow rounded-2xl px-4 py-3 flex items-center gap-2 shadow-xl">
                   <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" />
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">24/7 Support</span>
@@ -154,6 +196,30 @@ export function Hero() {
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">CEFR Certified</span>
                 </div>
               </FloatingElement>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="lg:hidden flex justify-center -mt-4"
+          >
+            <div className="relative w-48 sm:w-56">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/15 via-secondary-400/10 to-accent-500/15 rounded-full blur-2xl" />
+              <div className="relative rounded-2xl overflow-xl shadow-xl shadow-primary-500/15 border border-white/30 dark:border-white/10">
+                <img
+                  src="/images/creater.jpg"
+                  alt="Otabek Saidakhmadovich — Founder of MultiLevel Zone"
+                  className="w-full aspect-square object-cover object-top rounded-2xl"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 dark:ring-white/5" />
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent rounded-b-2xl">
+                  <p className="text-white text-xs font-bold text-center">Otabek Saidakhmadovich</p>
+                  <p className="text-white/60 text-[9px] text-center">Founder</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
